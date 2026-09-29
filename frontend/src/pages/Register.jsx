@@ -1,40 +1,120 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Register() {
-  const [role, setRole] = useState("student");
+  const navigate = useNavigate();
 
-  const handleRegister = (e) => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("student");
+  const [message, setMessage] = useState("");
+
+  const handleRegister = async (e) => {
     e.preventDefault();
-    alert("Registration successful!");
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/auth/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name,
+            email,
+            password,
+            role
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage(data.message);
+        return;
+      }
+
+      alert("Registration successful!");
+
+      navigate("/");
+    } catch (error) {
+      setMessage(
+        "Backend is not running."
+      );
+    }
   };
 
   return (
-    <div className="page">
-      <div className="card">
-        <h1>Create Account</h1>
+    <div className="auth-container">
+      <div className="auth-box">
+        <h1>Hostel Management</h1>
+        <h2>Register</h2>
 
         <form onSubmit={handleRegister}>
-          <label>Name</label>
-          <input type="text" placeholder="Enter name" required />
+          <input
+            type="text"
+            placeholder="Full Name"
+            value={name}
+            onChange={(e) =>
+              setName(e.target.value)
+            }
+            required
+          />
 
-          <label>Email</label>
-          <input type="email" placeholder="Enter email" required />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) =>
+              setEmail(e.target.value)
+            }
+            required
+          />
 
-          <label>Password</label>
-          <input type="password" placeholder="Enter password" required />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
+            required
+          />
 
-          <label>Register As</label>
-          <select value={role} onChange={(e) => setRole(e.target.value)}>
-            <option value="student">Student</option>
-            <option value="admin">Admin / Warden</option>
+          <select
+            value={role}
+            onChange={(e) =>
+              setRole(e.target.value)
+            }
+          >
+            <option value="student">
+              Student
+            </option>
+
+            <option value="admin">
+              Admin / Warden
+            </option>
           </select>
 
-          <button type="submit">Register</button>
+          <button type="submit">
+            Register
+          </button>
         </form>
 
+        {message && (
+          <p className="error">
+            {message}
+          </p>
+        )}
+
         <p>
-          Already registered? <Link to="/">Login</Link>
+          Already registered?{" "}
+          <Link to="/">
+            Login
+          </Link>
         </p>
       </div>
     </div>
